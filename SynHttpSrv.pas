@@ -31,10 +31,6 @@ uses
 {$undef DEBUG}
 //{$define DEBUG}
 
-//!!!TODO: SSL/https
-
-//{$define CIL} //only for dotnet testing...
-
 type
  // Result: True=found/stop, False=continue
  THeaderEnum = function(const Value: string; LParam: NativeUInt): boolean of object;
@@ -3318,8 +3314,6 @@ begin
  FSynapseServer.Socket.SSL.KeyPassword := FKeyPass;
  FSynapseServer.Socket.SSL.VerifyCert := True;
  //
- //if (Self.Port = '80') then
- //Self.Port := '443';
 end;
 
 initialization
