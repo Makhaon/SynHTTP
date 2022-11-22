@@ -1068,18 +1068,24 @@ end;
 procedure TryDecodeUtf8(var Url: string);
 var S: string;
 begin
-  S:=UTF8ToString(Url); // returns empty, if not valid Utf8...
+  S:=UTF8ToString(RawByteString(Url)); // returns empty, if not valid Utf8...
   if (S<>'') then
     Url:=S;
 end;
 {$endif}
 
-function ValHex(const S: string; var Value: integer): boolean;
+function ValHex(const S: AnsiString; var Value: integer): boolean;
 var
  code: integer;
 begin
- Val('$' + S, Value, Code);
+ Val('$' + string(S), Value, Code);
  Result := Code = 0;
+end;
+
+function AnsiCopy(const s: ansistring; StartIndex, Lenght: integer): ansistring;
+begin
+ SetLength(Result, Lenght);
+ Move(s[StartIndex], Result[1], Lenght);
 end;
 
 function ConvertUrlChars(Url: string): string;
@@ -1102,7 +1108,7 @@ begin
  while (p <= len) do
  begin
   if (buff[p] = '%') then
-   if ValHex(Copy(string(buff), p + 1, 2), code) then
+   if ValHex(AnsiCopy(buff, p + 1, 2), code) then
    begin
     Delete(buff, p + 1, 2);
     Dec(len, 2);
@@ -2156,6 +2162,7 @@ begin
  RegisterContentType('.bmp', 'image/bmp');
  RegisterContentType('.htc', 'text/x-component');
  RegisterContentType('.js', 'text/javascript');
+ RegisterContentType('.pdf', 'application/pdf');
 end;
 
 function GetContentTypeByExt(const Ext: string): string;
@@ -2822,7 +2829,8 @@ var
 
  function PreparePostStream: boolean;
  var
-  i, Size: integer;
+  i: integer;
+  Size: int64;
  begin
   Result := False;
   if (Request.TransferEncoding <> '') and (not SameText(Request.TransferEncoding, 'identity')) then
@@ -2845,7 +2853,7 @@ var
     i := Pos(';', S); {do not localize}
     if i > 0 then
      S := Copy(S, 1, i - 1);
-    Size := StrToIntDef('$' + Trim(S), 0);      {do not localize}
+    Size := StrToInt64Def('$' + Trim(S), 0);      {do not localize}
     if Size = 0 then
      Break;
     Connection.Socket.RecvStreamSize(Request.PostStream, cDefLineTimeout, Size);
@@ -2864,7 +2872,7 @@ var
    Request.PostStream.Position := 0;
    if Request.ContentLength > '0' then
    begin
-    Size := StrToIntDef(Request.ContentLength, 0);
+    Size := StrToInt64Def(Request.ContentLength, 0);
     Connection.Socket.RecvStreamSize(Request.PostStream, cDefLineTimeout, Size);
     Request.PostStream.Position := 0;
    end;

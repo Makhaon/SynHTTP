@@ -313,9 +313,9 @@ type
     FMaxLineLength: Integer;
     FLinuxLock: Boolean;
     FMaxSendBandwidth: Integer;
-    FNextSend: LongWord;
+    FNextSend: FixedUInt;
     FMaxRecvBandwidth: Integer;
-    FNextRecv: LongWord;
+    FNextRecv: FixedUInt;
     FConvertLineEnd: Boolean;
     FATResult: Boolean;
     FAtTimeout: integer;
@@ -352,7 +352,7 @@ type
     function LockfileName: String; virtual;
     procedure CreateLockfile(PidNr: integer); virtual;
 {$ENDIF}
-    procedure LimitBandwidth(Length: Integer; MaxB: integer; var Next: LongWord); virtual;
+    procedure LimitBandwidth(Length: Integer; MaxB: integer; var Next: FixedUInt); virtual;
     procedure SetBandwidth(Value: Integer); virtual;
   public
     {: data Control Block with communication parameters. Usable only when you
@@ -891,10 +891,10 @@ begin
   MaxRecvBandwidth := Value;
 end;
 
-procedure TBlockSerial.LimitBandwidth(Length: Integer; MaxB: integer; var Next: LongWord);
+procedure TBlockSerial.LimitBandwidth(Length: Integer; MaxB: integer; var Next: FixedUInt);
 var
-  x: LongWord;
-  y: LongWord;
+  x: FixedUInt;
+  y: FixedUInt;
 begin
   if MaxB > 0 then
   begin
@@ -952,7 +952,7 @@ var
 {$ENDIF}
 {$IFDEF ULTIBO}
 var
-  ResultCode: LongWord;
+  ResultCode: FixedUInt;
 {$ENDIF}
 begin
   // Is this TBlockSerial Instance already busy?
@@ -1092,7 +1092,7 @@ var
 {$ENDIF}
 {$IFDEF ULTIBO}
 var
-  ResultCode: LongWord;
+  ResultCode: FixedUInt;
 {$ENDIF}  
 begin
   Result := 0;
@@ -1109,7 +1109,7 @@ begin
   result := FileWrite(Fhandle, Buffer^, Length);
   serialcheck(result);
 {$ELSE}
-  ResultCode := SerialDeviceWrite(FSerialDevice, buffer, length, SERIAL_WRITE_NONE, LongWord(Result));
+  ResultCode := SerialDeviceWrite(FSerialDevice, buffer, length, SERIAL_WRITE_NONE, FixedUInt(Result));
   SetLastError(ResultCode);
   if ResultCode <> ERROR_SUCCESS then
     SerialCheck(sErr)
@@ -1227,13 +1227,13 @@ begin
   serialcheck(result);
 {$ELSE}
 var
-  ResultCode: LongWord;
+  ResultCode: FixedUInt;
 begin
   Result := 0;
   if PreTestFailing then   {HGJ}
     Exit;                  {HGJ}
   LimitBandwidth(Length, FMaxRecvBandwidth, FNextRecv);
-  ResultCode := SerialDeviceRead(FSerialDevice, buffer, length, SERIAL_READ_NONE, LongWord(Result));
+  ResultCode := SerialDeviceRead(FSerialDevice, buffer, length, SERIAL_READ_NONE, FixedUInt(Result));
   SetLastError(ResultCode);
   if ResultCode <> ERROR_SUCCESS then
     SerialCheck(sErr)
@@ -1279,7 +1279,7 @@ function TBlockSerial.RecvBufferEx(buffer: pointer; length: integer; timeout: in
 var
   s: AnsiString;
   rl, l: integer;
-  ti: LongWord;
+  ti: FixedUInt;
 begin
   Result := 0;
   if PreTestFailing then   {HGJ}
@@ -1404,7 +1404,7 @@ var
   CorCRLF: Boolean;
   t: ansistring;
   tl: integer;
-  ti: LongWord;
+  ti: FixedUInt;
 begin
   Result := '';
   if PreTestFailing then   {HGJ}
@@ -1571,9 +1571,9 @@ end;
 {$ELSE}
 function TBlockSerial.WaitingData: integer;
 var
-  ResultCode: LongWord;
+  ResultCode: FixedUInt;
 begin
-  ResultCode := SerialDeviceRead(FSerialDevice, @ResultCode, SizeOf(ResultCode), SERIAL_READ_PEEK_BUFFER, LongWord(Result));
+  ResultCode := SerialDeviceRead(FSerialDevice, @ResultCode, SizeOf(ResultCode), SERIAL_READ_PEEK_BUFFER, FixedUInt(Result));
   SetLastError(ResultCode);
   if ResultCode <> ERROR_SUCCESS then
   begin
@@ -1624,9 +1624,9 @@ end;
 {$ELSE}
 function TBlockSerial.SendingData: integer;
 var
-  ResultCode: LongWord;
+  ResultCode: FixedUInt;
 begin
-  ResultCode := SerialDeviceWrite(FSerialDevice, @ResultCode, SizeOf(ResultCode), SERIAL_WRITE_PEEK_BUFFER, LongWord(Result));
+  ResultCode := SerialDeviceWrite(FSerialDevice, @ResultCode, SizeOf(ResultCode), SERIAL_WRITE_PEEK_BUFFER, FixedUInt(Result));
   SetLastError(ResultCode);
   if ResultCode <> ERROR_SUCCESS then
   begin
@@ -1792,7 +1792,7 @@ end;
 {$ELSE}
 procedure TBlockSerial.SetCommState;
 var
-  ResultCode: LongWord;
+  ResultCode: FixedUInt;
   Properties: TSerialProperties;
 begin
   FillChar(Properties, SizeOf(TSerialProperties), 0);
@@ -1867,7 +1867,7 @@ end;
 {$ELSE}
 procedure TBlockSerial.GetCommState;
 var
-  ResultCode: LongWord;
+  ResultCode: FixedUInt;
   Properties: TSerialProperties;
 begin
   ResultCode := SerialDeviceGetProperties(FSerialDevice, @Properties);
@@ -2131,7 +2131,7 @@ end;
 {$ELSE}
 function TBlockSerial.CanRead(Timeout: integer): boolean;
 var
-  Count: LongWord;
+  Count: FixedUInt;
 begin
   Result := WaitingData > 0;
   if not Result then
@@ -2194,7 +2194,7 @@ end;
 {$ELSE}
 function TBlockSerial.CanWrite(Timeout: integer): boolean;
 var
-  Count: LongWord;
+  Count: FixedUInt;
 begin
   Result := SendingData < FSendBuffer;
   if not Result then
@@ -2214,7 +2214,7 @@ end;
 {$ELSE}
 function TBlockSerial.CanWrite(Timeout: integer): boolean;
 var
-  t: LongWord;
+  t: FixedUInt;
 begin
   Result := SendingData = 0;
   if not Result then
@@ -2743,7 +2743,7 @@ type
     Devices: String;
   end;
   
-function SerialDeviceCallback(Serial:PSerialDevice;Data:Pointer):LongWord;
+function SerialDeviceCallback(Serial:PSerialDevice;Data:Pointer):FixedUInt;
 var 
   SerialCallbackData: PSerialCallbackData;
 begin

@@ -102,7 +102,7 @@ const
 
 type
   DWORD = Integer;
-  __fd_mask = LongWord;
+  __fd_mask = FixedUInt;
 const
   __FD_SETSIZE    = 1024;
   __NFDBITS       = 8 * sizeof(__fd_mask);
@@ -731,7 +731,7 @@ end;
 
 function __FDMASK(Socket: TSocket): __fd_mask;
 begin
-  Result := LongWord(1) shl (Socket mod __NFDBITS);
+  Result := FixedUInt(1) shl (Socket mod __NFDBITS);
 end;
 
 function FD_ISSET(Socket: TSocket; var fdset: TFDSet): Boolean;

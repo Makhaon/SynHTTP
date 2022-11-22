@@ -85,9 +85,9 @@ unit synsock;
     {$ENDIF}
   {$ENDIF}
 {$ENDIF}
-{$IFDEF POSIX}
-   {$I ssposix.inc} //experimental!
-{$ENDIF}
+//{$IFDEF POSIX}
+//   {$I ssposix.inc} //experimental!
+//{$ENDIF}
 
 end.
 

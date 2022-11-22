@@ -48,6 +48,8 @@
 {$IFDEF POSIX}
 {for delphi XE2+}
 
+{$WARN SYMBOL_PLATFORM OFF}
+
 //{$DEFINE FORCEOLDAPI}
 {Note about define FORCEOLDAPI:
 If you activate this compiler directive, then is allways used old socket API
@@ -76,6 +78,7 @@ function InitSocketInterface(stack: string): Boolean;
 function DestroySocketInterface: Boolean;
 
 const
+  WSABASEERR   = 10000;
   DLLStackName = '';
   WinsockLevel = $0202;
 
@@ -370,9 +373,9 @@ type
                     sin_addr: TInAddr;
                     sin_zero: array[0..7] of Byte);
           AF_INET6: (sin6_port:     word;
-                		sin6_flowinfo: longword;
+                		sin6_flowinfo: FixedUInt;
       	    	      sin6_addr:     TInAddr6;
-      		          sin6_scope_id: longword);
+      		          sin6_scope_id: FixedUInt);
           );
   end;
 
@@ -392,11 +395,11 @@ function SizeOfVarSin(sin: TVarSin): integer;
   function SendTo(s: TSocket; Buf: TMemory; len, flags: Integer; addrto: TVarSin): Integer;
   function RecvFrom(s: TSocket; Buf: TMemory; len, flags: Integer; var from: TVarSin): Integer;
   function ntohs(netshort: word): word;
-  function ntohl(netlong: longword): longword;
+  function ntohl(netlong: FixedUInt): FixedUInt;
   function Listen(s: TSocket; backlog: Integer): Integer;
   function IoctlSocket(s: TSocket; cmd: Integer; var arg: integer): Integer;
   function htons(hostshort: word): word;
-  function htonl(hostlong: longword): longword;
+  function htonl(hostlong: FixedUInt): FixedUInt;
   function GetSockName(s: TSocket; var name: TVarSin): Integer;
   function GetPeerName(s: TSocket; var name: TVarSin): Integer;
   function Connect(s: TSocket; const name: TVarSin): Integer;
@@ -639,7 +642,7 @@ begin
   Result := Posix.ArpaInet.ntohs(NetShort);
 end;
 
-function  ntohl(netlong: longword): longword;
+function  ntohl(netlong: FixedUInt): FixedUInt;
 begin
   Result := Posix.ArpaInet.ntohl(NetLong);
 end;
@@ -662,7 +665,7 @@ begin
   Result := Posix.ArpaInet.htons(Hostshort);
 end;
 
-function  htonl(hostlong: longword): longword;
+function  htonl(hostlong: FixedUInt): FixedUInt;
 begin
   Result := Posix.ArpaInet.htonl(HostLong);
 end;

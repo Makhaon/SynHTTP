@@ -79,7 +79,6 @@ interface
 uses
 {$IFNDEF MSWINDOWS}
   {$IFNDEF FPC}
-  Libc,
   {$ENDIF}
 {$ELSE}
   Windows,
@@ -1503,7 +1502,7 @@ end;
 
 function GetCurCP: TMimeChar;
 begin
-  {$IFNDEF FPC}
+  {$IFNDEF LINUX}
   Result := GetCPFromID(nl_langinfo(_NL_CTYPE_CODESET_NAME));
   {$ELSE}
   //How to get system codepage without LIBC?

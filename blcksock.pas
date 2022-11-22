@@ -323,9 +323,9 @@ type
     FNonBlockMode: Boolean;
     FMaxLineLength: Integer;
     FMaxSendBandwidth: Integer;
-    FNextSend: LongWord;
+    FNextSend: FixedUInt;
     FMaxRecvBandwidth: Integer;
-    FNextRecv: LongWord;
+    FNextRecv: FixedUInt;
     FConvertLineEnd: Boolean;
     FLastCR: Boolean;
     FLastLF: Boolean;
@@ -339,9 +339,9 @@ type
     {$IFNDEF CIL}
     FFDSet: TFDSet;
     {$ENDIF}
-    FRecvCounter: Integer;
-    FSendCounter: Integer;
-    FSendMaxChunk: Integer;
+    FRecvCounter: int64;
+    FSendCounter: int64;
+    FSendMaxChunk: int64;
     FStopFlag: Boolean;
     FNonblockSendTimeout: Integer;
     FHeartbeatRate: integer;
@@ -377,7 +377,7 @@ type
     procedure DoMonitor(Writing: Boolean; const Buffer: TMemory; Len: Integer);
     procedure DoCreateSocket;
     procedure DoHeartbeat;
-    procedure LimitBandwidth(Length: Integer; MaxB: integer; var Next: LongWord);
+    procedure LimitBandwidth(Length: Integer; MaxB: integer; var Next: FixedUInt);
     procedure SetBandwidth(Value: Integer);
     function TestStopFlag: Boolean;
     procedure InternalSendStream(const Stream: TStream; WithSize, Indy: boolean); virtual;
@@ -575,7 +575,7 @@ type
      occured.)}
     procedure RecvStreamRaw(const Stream: TStream; Timeout: Integer); virtual;
     {:Read requested count of bytes from socket to stream.}
-    procedure RecvStreamSize(const Stream: TStream; Timeout: Integer; Size: Integer);
+    procedure RecvStreamSize(const Stream: TStream; Timeout: Integer; Size: int64);
 
     {:Receive data to stream. It using @link(RecvBlock) method.}
     procedure RecvStream(const Stream: TStream; Timeout: Integer); virtual;
@@ -798,11 +798,11 @@ type
 
     {:Return count of received bytes on this socket from begin of current
      connection.}
-    property RecvCounter: Integer read FRecvCounter;
+    property RecvCounter: int64 read FRecvCounter;
 
     {:Return count of sended bytes on this socket from begin of current
      connection.}
-    property SendCounter: Integer read FSendCounter;
+    property SendCounter: int64 read FSendCounter;
   published
     {:Return descriptive string for given error code. This is class function.
      You may call it without created object!}
@@ -861,7 +861,7 @@ type
     property InterPacketTimeout: Boolean read FInterPacketTimeout Write FInterPacketTimeout;
 
     {:All sended datas was splitted by this value.}
-    property SendMaxChunk: Integer read FSendMaxChunk Write FSendMaxChunk;
+    property SendMaxChunk: int64 read FSendMaxChunk Write FSendMaxChunk;
 
     {:By setting this property to @true you can stop any communication. You can
      use this property for soft abort of communication.}
@@ -1147,7 +1147,7 @@ type
 
     {:Silently redirected to @link(TBlockSocket.RecvBufferFrom).}
     function RecvBuffer(Buffer: TMemory; Length: Integer): Integer; override;
-    
+
     {:Specify if connect should called on the underlying socket.}
     property UseConnect: Boolean read FUseConnect Write FUseConnect;
   end;
@@ -1509,9 +1509,9 @@ type
     TTL: Byte;
     Protocol: Byte;
     CheckSum: Word;
-    SourceIp: LongWord;
-    DestIp: LongWord;
-    Options: LongWord;
+    SourceIp: FixedUInt;
+    DestIp: FixedUInt;
+    Options: FixedUInt;
   end;
 
   {:@abstract(Parent class of application protocol implementations.)
@@ -1649,9 +1649,9 @@ begin
   for n := FDelayedOptions.Count - 1 downto 0 do
     begin
       p := TSynaOption(FDelayedOptions[n]);
-      p.Free;
+      FreeAndNil(p);
     end;
-  FDelayedOptions.Free;
+  FreeAndNil(FDelayedOptions);
   inherited Destroy;
 end;
 
@@ -1673,7 +1673,7 @@ var
   x: integer;
   buf: TMemory;
 {$IFNDEF MSWINDOWS}
-{$IFNDEF ULTIBO}  
+{$IFNDEF ULTIBO}
   timeval: TTimeval;
 {$ENDIF}
 {$ENDIF}
@@ -1850,7 +1850,7 @@ begin
         ExceptCheck;
       end;
   end;
-  Value.free;
+  FreeAndNil(Value);
 end;
 
 procedure TBlockSocket.DelayedOption(const Value: TSynaOption);
@@ -1999,7 +1999,7 @@ begin
   for n := FDelayedOptions.Count - 1 downto 0 do
     begin
       p := TSynaOption(FDelayedOptions[n]);
-      p.Free;
+      FreeAndNil(p);
     end;
   FDelayedOptions.Clear;
   FFamily := FFamilySave;
@@ -2104,10 +2104,10 @@ begin
   MaxRecvBandwidth := Value;
 end;
 
-procedure TBlockSocket.LimitBandwidth(Length: Integer; MaxB: integer; var Next: LongWord);
+procedure TBlockSocket.LimitBandwidth(Length: Integer; MaxB: integer; var Next: FixedUInt);
 var
-  x: LongWord;
-  y: LongWord;
+  x: FixedUInt;
+  y: FixedUInt;
   n: integer;
 begin
   if FStopFlag then
@@ -2255,7 +2255,7 @@ end;
 
 procedure TBlockSocket.InternalSendStream(const Stream: TStream; WithSize, Indy: boolean);
 var
-  l: integer;
+  l: int64;
   yr: integer;
   s: string;
   b: boolean;
@@ -2347,7 +2347,7 @@ function TBlockSocket.RecvBufferEx(Buffer: TMemory; Len: Integer;
 var
   s: TSynaBytes;
   rl, l: integer;
-  ti: LongWord;
+  ti: FixedUInt;
 {$IFDEF CIL}
   n: integer;
   b: TMemory;
@@ -2520,7 +2520,7 @@ var
   CorCRLF: Boolean;
   t: string;
   tl: integer;
-  ti: LongWord;
+  ti: FixedUInt;
 begin
   ResetLastError;
   Result := '';
@@ -2611,7 +2611,7 @@ begin
   until FLastError <> 0;
 end;
 
-procedure TBlockSocket.RecvStreamSize(const Stream: TStream; Timeout: Integer; Size: Integer);
+procedure TBlockSocket.RecvStreamSize(const Stream: TStream; Timeout: Integer; Size: int64);
 var
   s: TSynaBytes;
   n: integer;
@@ -2835,7 +2835,7 @@ begin
     ResolveNameToIP(Name, l);
     Result := l[0];
   finally
-    l.Free;
+    FreeAndNil(l);
   end;
 end;
 
@@ -3731,7 +3731,7 @@ begin
     SockCheck(synsock.Connect(FSocket, FRemoteSin));
     if FLastError = 0 then
       GetSins;
-  end;    
+  end;
   FBuffer := '';
   DoStatus(HR_Connect, IP + ':' + Port);
 end;
@@ -3751,7 +3751,7 @@ end;
 destructor TUDPBlockSocket.Destroy;
 begin
   if Assigned(FSocksControlSock) then
-    FSocksControlSock.Free;
+    FreeAndNil(FSocksControlSock);
   inherited;
 end;
 
@@ -3983,7 +3983,7 @@ end;
 destructor TTCPBlockSocket.Destroy;
 begin
   inherited Destroy;
-  FSSL.Free;
+  FreeAndNil(FSSL);
 end;
 
 function TTCPBlockSocket.GetErrorDescEx: string;

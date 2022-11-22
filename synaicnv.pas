@@ -72,7 +72,6 @@ uses
   synafpc,
 {$IFNDEF MSWINDOWS}
   {$IFNDEF FPC}
-  Libc,
   {$ENDIF}
   SysUtils;
 {$ELSE}
@@ -294,10 +293,10 @@ begin
       if (IconvLibHandle <> 0) then
       begin
 {$IFNDEF CIL}
-        _iconv_open := GetProcAddress(IconvLibHandle, PAnsiChar(AnsiString('libiconv_open')));
-        _iconv := GetProcAddress(IconvLibHandle, PAnsiChar(AnsiString('libiconv')));
-        _iconv_close := GetProcAddress(IconvLibHandle, PAnsiChar(AnsiString('libiconv_close')));
-        _iconvctl := GetProcAddress(IconvLibHandle, PAnsiChar(AnsiString('libiconvctl')));
+        _iconv_open := GetProcAddress(IconvLibHandle, PChar('libiconv_open'));
+        _iconv := GetProcAddress(IconvLibHandle, PChar('libiconv'));
+        _iconv_close := GetProcAddress(IconvLibHandle, PChar('libiconv_close'));
+        _iconvctl := GetProcAddress(IconvLibHandle, PChar('libiconvctl'));
 {$ENDIF}
         Result := True;
         Iconvloaded := True;

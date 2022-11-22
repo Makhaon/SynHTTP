@@ -160,8 +160,8 @@ type
   {:@abstract(Implementation of AES encryption)}
   TSynaAes= class(TSynaBlockcipher)
   protected
-    numrounds: longword;
-    rk, drk: array[0..MAXROUNDS,0..7] of longword;
+    numrounds: FixedUInt;
+    rk, drk: array[0..MAXROUNDS,0..7] of FixedUInt;
     procedure InitKey(Key: AnsiString); override;
     function GetSize: byte; override;
   public
@@ -1354,7 +1354,7 @@ const
 
 {==============================================================================}
 type
-  PDWord = ^LongWord;
+  PDWord = ^FixedUInt;
 
 procedure hperm_op(var a, t: integer; n, m: integer);
 begin
@@ -1968,7 +1968,7 @@ end;
 
 procedure InvMixColumn(a: PByteArray; BC: byte);
 var
-  j: longword;
+  j: FixedUInt;
 begin
   for j:= 0 to (BC-1) do
     PDWord(@(a^[j*4]))^:= PDWord(@U1[a^[j*4+0]])^
@@ -1987,7 +1987,7 @@ end;
 procedure TSynaAes.InitKey(Key: AnsiString);
 var
   Size: integer;
-  KC, ROUNDS, j, r, t, rconpointer: longword;
+  KC, ROUNDS, j, r, t, rconpointer: FixedUInt;
   tk: array[0..MAXKC-1,0..3] of byte;
   //n: integer;
 begin
@@ -2080,7 +2080,7 @@ end;
 
 function TSynaAes.EncryptECB(const InData: AnsiString): AnsiString;
 var
-  r: longword;
+  r: FixedUInt;
   tempb: array[0..MAXBC-1,0..3] of byte;
   a: array[0..MAXBC,0..3] of byte;
   p: pointer;
@@ -2141,7 +2141,7 @@ end;
 
 function TSynaAes.DecryptECB(const InData: AnsiString): AnsiString;
 var
-  r: longword;
+  r: FixedUInt;
   tempb: array[0..MAXBC-1,0..3] of byte;
   a: array[0..MAXBC,0..3] of byte;
   p: pointer;

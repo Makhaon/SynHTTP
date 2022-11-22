@@ -368,9 +368,9 @@ type
                     sin_addr: TInAddr;
                     sin_zero: array[0..7] of Char);
           AF_INET6: (sin6_port:     word;
-                		sin6_flowinfo: longword;
+                		sin6_flowinfo: FixedUInt;
       	    	      sin6_addr:     TInAddr6;
-      		          sin6_scope_id: longword);
+      		          sin6_scope_id: FixedUInt);
           );
   end;
 
@@ -390,11 +390,11 @@ function SizeOfVarSin(sin: TVarSin): integer;
   function SendTo(s: TSocket; Buf: TMemory; len, flags: Integer; addrto: TVarSin): Integer;
   function RecvFrom(s: TSocket; Buf: TMemory; len, flags: Integer; var from: TVarSin): Integer;
   function ntohs(netshort: word): word;
-  function ntohl(netlong: longword): longword;
+  function ntohl(netlong: FixedUInt): FixedUInt;
   function Listen(s: TSocket; backlog: Integer): Integer;
   function IoctlSocket(s: TSocket; cmd: DWORD; var arg: integer): Integer;
   function htons(hostshort: word): word;
-  function htonl(hostlong: longword): longword;
+  function htonl(hostlong: FixedUInt): FixedUInt;
   function GetSockName(s: TSocket; var name: TVarSin): Integer;
   function GetPeerName(s: TSocket; var name: TVarSin): Integer;
   function Connect(s: TSocket; const name: TVarSin): Integer;
@@ -617,7 +617,7 @@ begin
   Result := sockets.ntohs(NetShort);
 end;
 
-function  ntohl(netlong: longword): longword;
+function  ntohl(netlong: FixedUInt): FixedUInt;
 begin
   Result := sockets.ntohl(NetLong);
 end;
@@ -640,7 +640,7 @@ begin
   Result := sockets.htons(Hostshort);
 end;
 
-function  htonl(hostlong: longword): longword;
+function  htonl(hostlong: FixedUInt): FixedUInt;
 begin
   Result := sockets.htonl(HostLong);
 end;
