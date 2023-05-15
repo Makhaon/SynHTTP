@@ -20,10 +20,9 @@ uses
  {$ELSE}
  SynaUtil,
  {$ENDIF}
- ssl_openssl,
+
  SysUtils,
  Classes,
- synsock,
  blcksock,
  SynSrv;
 //-------------------------------------------------------------
@@ -532,7 +531,7 @@ begin
  // Right-trim:
  len := Length(Line);
  if (len = 0) then
-  exit;
+  Exit;
  if (Line[1] <= ' ') then
   Line := Trim(Line)
  else
@@ -540,7 +539,7 @@ begin
   Line := TrimRight(Line);
  // Normalize arround ":"...
  p := Pos(':', Line);
- if (p > 1) then
+ if (p > 1) and (p < Length(Line) - 1) then
   if (Line[p - 1] <= ' ') or not (Line[p + 1] <= ' ') or (Line[p + 2] <= ' ') then
   begin
    // Needs normalize...

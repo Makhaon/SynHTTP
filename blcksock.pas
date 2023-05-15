@@ -285,8 +285,7 @@ type
     );
 
   {:@abstract(this object is used for remember delayed socket option set.)}
-  TSynaOption = class(TObject)
-  public
+  TSynaOption = record
     Option: TSynaOptionType;
     Enabled: Boolean;
     Value: Integer;
@@ -301,7 +300,7 @@ type
   TOptionList = TList<TSynaOption>;
   TSocketList = TList<TBlockSocket>;
 {$ELSE}
-  TOptionList = TList;
+  TOptionList = TArray<TSynaOption>;
   TSocketList = TList;
 {$ENDIF}
   {:@abstract(Basic IP object.)
@@ -1591,7 +1590,7 @@ var
 {$ENDIF}
 begin
   inherited Create;
-  FDelayedOptions := TOptionList.Create;
+  //FDelayedOptions := TOptionList.Create;
   FRaiseExcept := False;
 {$IFDEF RAISEEXCEPT}
   FRaiseExcept := True;
@@ -1637,21 +1636,22 @@ begin
 end;
 
 destructor TBlockSocket.Destroy;
-var
-  n: integer;
-  p: TSynaOption;
+//var
+  //n: integer;
+//  p: TSynaOption;
 begin
   CloseSocket;
 {$IFNDEF ONCEWINSOCK}
   synsock.WSACleanup;
   DestroySocketInterface;
 {$ENDIF}
-  for n := FDelayedOptions.Count - 1 downto 0 do
+  {for n := FDelayedOptions.Count - 1 downto 0 do
     begin
       p := TSynaOption(FDelayedOptions[n]);
       FreeAndNil(p);
-    end;
-  FreeAndNil(FDelayedOptions);
+    end;}
+  //FreeAndNil(FDelayedOptions);
+  Finalize(FDelayedOptions);
   inherited Destroy;
 end;
 
@@ -1850,14 +1850,14 @@ begin
         ExceptCheck;
       end;
   end;
-  FreeAndNil(Value);
+  //FreeAndNil(Value);
 end;
 
 procedure TBlockSocket.DelayedOption(const Value: TSynaOption);
 begin
   if FSocket = INVALID_SOCKET then
   begin
-    FDelayedOptions.Insert(0, Value);
+    FDelayedOptions := FDelayedOptions + [Value];
   end
   else
     SetDelayedOption(Value);
@@ -1868,12 +1868,12 @@ var
   n: integer;
   d: TSynaOption;
 begin
-  for n := FDelayedOptions.Count - 1 downto 0 do
+  for n := 0 to High(FDelayedOptions) do
   begin
     d := TSynaOption(FDelayedOptions[n]);
     SetDelayedOption(d);
   end;
-  FDelayedOptions.Clear;
+  Finalize(FDelayedOptions);
 end;
 
 procedure TBlockSocket.SetSin(var Sin: TVarSin; const IP, Port: string);
@@ -1989,19 +1989,20 @@ begin
 end;
 
 procedure TBlockSocket.AbortSocket;
-var
-  n: integer;
-  p: TSynaOption;
+//var
+//  n: integer;
+//  p: TSynaOption;
 begin
   if FSocket <> INVALID_SOCKET then
     synsock.CloseSocket(FSocket);
   FSocket := INVALID_SOCKET;
-  for n := FDelayedOptions.Count - 1 downto 0 do
+  {for n := FDelayedOptions.Count - 1 downto 0 do
     begin
       p := TSynaOption(FDelayedOptions[n]);
       FreeAndNil(p);
     end;
-  FDelayedOptions.Clear;
+  FDelayedOptions.Clear;}
+  Finalize(FDelayedOptions);
   FFamily := FFamilySave;
   DoStatus(HR_SocketClose, '');
   FDisconnected := False;
@@ -2034,7 +2035,9 @@ procedure TBlockSocket.Connect(const IP, Port: string);
 var
   Sin: TVarSin;
   b: boolean;
+  {$IFDEF MSWINDOWS}
   lError: Integer;
+  {$ENDIF}
 begin
   SetSin(Sin, IP, Port);
   if FLastError = 0 then
@@ -2050,9 +2053,13 @@ begin
       if (FLastError = WSAEINPROGRESS) OR (FLastError = WSAEWOULDBLOCK) then
         if not CanWrite(FConnectionTimeout) then
           FLastError := WSAETIMEDOUT;
+      {$IFDEF MSWINDOWS}
       lError := FLastError;
+      {$ENDIF}
       NonBlockMode := b;
+      {$IFDEF MSWINDOWS}
       FLastError := lError;
+      {$ENDIF}
     end
     else
       SockCheck(synsock.Connect(FSocket, Sin));
@@ -2803,7 +2810,7 @@ procedure TBlockSocket.SetLinger(Enable: Boolean; Linger: Integer);
 var
   d: TSynaOption;
 begin
-  d := TSynaOption.Create;
+  //d := TSynaOption.Create;
   d.Option := SOT_Linger;
   d.Enabled := Enable;
   d.Value := Linger;
@@ -3065,7 +3072,7 @@ procedure TBlockSocket.SetSizeRecvBuffer(Size: Integer);
 var
   d: TSynaOption;
 begin
-  d := TSynaOption.Create;
+  //d := TSynaOption.Create;
   d.Option := SOT_RecvBuff;
   d.Value := Size;
   DelayedOption(d);
@@ -3095,7 +3102,7 @@ procedure TBlockSocket.SetSizeSendBuffer(Size: Integer);
 var
   d: TSynaOption;
 begin
-  d := TSynaOption.Create;
+  //d := TSynaOption.Create;
   d.Option := SOT_SendBuff;
   d.Value := Size;
   DelayedOption(d);
@@ -3105,7 +3112,7 @@ procedure TBlockSocket.SetNagleMode(Value: Boolean);
 var
   d: TSynaOption;
 begin
-  d := TSynaOption.Create;
+  //d := TSynaOption.Create;
   d.Option := SOT_NoDelay;
   d.Enabled := Value;
   DelayedOption(d);
@@ -3115,7 +3122,7 @@ procedure TBlockSocket.SetNonBlockMode(Value: Boolean);
 var
   d: TSynaOption;
 begin
-  d := TSynaOption.Create;
+  //d := TSynaOption.Create;
   d.Option := SOT_nonblock;
   d.Enabled := Value;
   DelayedOption(d);
@@ -3131,7 +3138,7 @@ procedure TBlockSocket.SetSendTimeout(Timeout: Integer);
 var
   d: TSynaOption;
 begin
-  d := TSynaOption.Create;
+  //d := TSynaOption.Create;
   d.Option := SOT_sendtimeout;
   d.Value := Timeout;
   DelayedOption(d);
@@ -3141,7 +3148,7 @@ procedure TBlockSocket.SetRecvTimeout(Timeout: Integer);
 var
   d: TSynaOption;
 begin
-  d := TSynaOption.Create;
+  //d := TSynaOption.Create;
   d.Option := SOT_recvtimeout;
   d.Value := Timeout;
   DelayedOption(d);
@@ -3190,7 +3197,7 @@ procedure TBlockSocket.EnableReuse(Value: Boolean);
 var
   d: TSynaOption;
 begin
-  d := TSynaOption.Create;
+  //d := TSynaOption.Create;
   d.Option := SOT_reuse;
   d.Enabled := Value;
   DelayedOption(d);
@@ -3200,7 +3207,7 @@ procedure TBlockSocket.SetTTL(TTL: integer);
 var
   d: TSynaOption;
 begin
-  d := TSynaOption.Create;
+  //d := TSynaOption.Create;
   d.Option := SOT_TTL;
   d.Value := TTL;
   DelayedOption(d);
@@ -3759,7 +3766,7 @@ procedure TUDPBlockSocket.EnableBroadcast(Value: Boolean);
 var
   d: TSynaOption;
 begin
-  d := TSynaOption.Create;
+  //d := TSynaOption.Create;
   d.Option := SOT_Broadcast;
   d.Enabled := Value;
   DelayedOption(d);
@@ -3920,7 +3927,7 @@ procedure TUDPBlockSocket.SetMulticastTTL(TTL: integer);
 var
   d: TSynaOption;
 begin
-  d := TSynaOption.Create;
+  //d := TSynaOption.Create;
   d.Option := SOT_MulticastTTL;
   d.Value := TTL;
   DelayedOption(d);
@@ -3944,7 +3951,7 @@ procedure TUDPBlockSocket.EnableMulticastLoop(Value: Boolean);
 var
   d: TSynaOption;
 begin
-  d := TSynaOption.Create;
+  //d := TSynaOption.Create;
   d.Option := SOT_MulticastLoop;
   d.Enabled := Value;
   DelayedOption(d);

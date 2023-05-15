@@ -34,7 +34,7 @@ type
 
  TListenerThread = class(TThread)
  private
-  FThreadList: TObjectList<TSynTcpSrvConnection>;
+  FThreadList: TThreadList<TSynTcpSrvConnection>;
   FSocket:     TTCPBlockSocket;
   FPort:       string;
   FHost:       string;
@@ -71,6 +71,7 @@ type
  TCommandHandler = procedure(Connection: TSynTcpSrvConnection; Command: string) of object;
 
  // TSynTcpServer - Generic TCP server component
+ [ComponentPlatformsAttribute(pidAllPlatforms)]
  TSynTcpServer = class(TComponent)
  protected
   FActive:        boolean;
@@ -106,6 +107,7 @@ type
 
 //-------------------------------------------------------------
 implementation
+
 //-------------------------------------------------------------
 
 { TSynTcpServer }
@@ -175,10 +177,19 @@ end;
 procedure TListenerThread.ClearFinishedThreads;
 var
  i: integer;
+ List: TList<TSynTcpSrvConnection>;
 begin
- for i := FThreadList.Count - 1 downto 0 do
-  if FThreadList[i].FFinished then
-   FThreadList.Remove(FThreadList[i]);
+ List := FThreadList.LockList;
+ try
+  for i := List.Count - 1 downto 0 do
+   if List[i].FFinished then
+   begin
+    List[i].Free;
+    List.Remove(List[i]);
+   end;
+ finally
+  FThreadList.UnlockList;
+ end;
 end;
 
 procedure TListenerThread.BindSocket;
@@ -204,7 +215,7 @@ end;
 constructor TListenerThread.Create(ASuspended: boolean; ATcpServer: TSynTcpServer);
 begin
  FSocket := TTCPBlockSocket.Create;
- FThreadList := TObjectList<TSynTcpSrvConnection>.Create;
+ FThreadList := TThreadList<TSynTcpSrvConnection>.Create;
  FTcpServer := ATcpServer;
  inherited Create(ASuspended);
 end;
@@ -212,14 +223,20 @@ end;
 destructor TListenerThread.Destroy;
 var
  i: integer;
+ List: TList<TSynTcpSrvConnection>;
 begin
  FSocket.CloseSocket;
- for i := 0 to FThreadList.Count - 1 do
- begin
-  FThreadList[i].Terminate;
-  FThreadList[i].Socket.CloseSocket;
+ List := FThreadList.LockList;
+ try
+  for i := 0 to List.Count - 1 do
+  begin
+   List[i].Terminate;
+   List[i].Socket.CloseSocket;
+   List[i].Free;
+  end;
+ finally
+  FThreadList.UnlockList;
  end;
- ClearFinishedThreads;
  FreeAndNil(FThreadList);
  FreeAndNil(FSocket);
  inherited;
@@ -229,7 +246,6 @@ procedure TListenerThread.Execute;
 var
  SynapseConnect: TSynTcpSrvConnection;
 begin
- inherited;
  repeat
   if FSocket.CanRead(100) then
   begin
@@ -252,10 +268,10 @@ begin
  inherited Create(ASuspended);
  FSocket := TTCPBlockSocket.Create;
  FSocket.Owner := Self;
- FSocket.SSL.CertificateFile:= ATcpServer.FSynapseServer.FSocket.SSL.CertificateFile;
- FSocket.SSL.PrivateKeyFile:= ATcpServer.FSynapseServer.FSocket.SSL.PrivateKeyFile;
- FSocket.SSL.KeyPassword:= ATcpServer.FSynapseServer.FSocket.SSL.KeyPassword;
- FSocket.SSL.VerifyCert:= ATcpServer.FSynapseServer.FSocket.SSL.VerifyCert;
+ FSocket.SSL.CertificateFile := ATcpServer.FSynapseServer.FSocket.SSL.CertificateFile;
+ FSocket.SSL.PrivateKeyFile := ATcpServer.FSynapseServer.FSocket.SSL.PrivateKeyFile;
+ FSocket.SSL.KeyPassword := ATcpServer.FSynapseServer.FSocket.SSL.KeyPassword;
+ FSocket.SSL.VerifyCert := ATcpServer.FSynapseServer.FSocket.SSL.VerifyCert;
  FTcpServer := ATcpServer;
  if ASocket <> INVALID_SOCKET then
  begin

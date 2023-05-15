@@ -1020,10 +1020,7 @@ begin
       end;
     finally
       if Assigned(Addr) then
-      begin
-        _Addr := Addr^;
-        FreeAddrInfo(_Addr);
-      end;
+        FreeAddrInfo(Addr^);
     end;
   end;
 end;
@@ -1081,10 +1078,7 @@ begin
       end;
     finally
       if Assigned(Addr) then
-      begin
-        _Addr := Addr^;
-        FreeAddrInfo(_Addr);
-      end;
+        FreeAddrInfo(Addr^);
     end;
   end;
 end;
