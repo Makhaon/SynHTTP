@@ -1,5 +1,5 @@
 {==============================================================================|
-| Project : Ararat Synapse                                       | 003.008.000 |
+| Project : Ararat Synapse                                       | 003.009.000 |
 |==============================================================================|
 | Content: SSL support by OpenSSL                                              |
 |==============================================================================|
@@ -35,10 +35,12 @@
 | The Initial Developer of the Original Code is Lukas Gebauer (Czech Republic).|
 | Portions created by Lukas Gebauer are Copyright (c)2002-2017.                |
 | Portions created by Petr Fejfar are Copyright (c)2011-2012.                  |
+| Portions created by Pepak are Copyright (c)2018.                             |
 | All Rights Reserved.                                                         |
 |==============================================================================|
 | Contributor(s):                                                              |
 |   Tomas Hajny (OS2 support)                                                  |
+|   Pepak (multiversion support)                                               |
 |==============================================================================|
 | History: see HISTORY.HTM from distribution package                           |
 |          (Found at URL: http://www.ararat.cz/synapse/)                       |
@@ -100,6 +102,7 @@ uses
   {$ENDIF}
   SysUtils;
 {$ELSE}
+  SysUtils,
   Windows;
 {$ENDIF}
 
@@ -137,11 +140,59 @@ var
   DLLSSLName: string = 'ssleay32.dll';
   DLLSSLName2: string = 'libssl32.dll';
   DLLUtilName: string = 'libeay32.dll';
-
-  DLL_LIBCRYPTO_1_1: string = 'libcrypto-1_1.dll';
-  DLL_LIBSSL_1_1: string = 'libssl-1_1.dll';
-
   {$ENDIF}
+{$IFDEF MSWINDOWS}
+const
+  LibCount = 5;
+  SSLLibNames: array[0..LibCount-1] of string = (
+    // OpenSSL v3.0
+    {$IFDEF WIN64}
+    'libssl-3-x64.dll',
+    {$ELSE}
+    'libssl-3.dll',
+    {$ENDIF}
+    // OpenSSL v1.1.x
+    {$IFDEF WIN64}
+    'libssl-1_1-x64.dll',
+    {$ELSE}
+    'libssl-1_1.dll',
+    {$ENDIF}
+    // OpenSSL v1.0.2 distinct names for x64 and x86
+    {$IFDEF WIN64}
+    'ssleay32-x64.dll',
+    {$ELSE}
+    'ssleay32-x86.dll',
+    {$ENDIF}
+    // OpenSSL v1.0.2
+    'ssleay32.dll',
+    // OpenSSL (ancient)
+    'libssl32.dll'
+  );
+  CryptoLibNames: array[0..LibCount-1] of string = (
+    // OpenSSL v3.0
+    {$IFDEF WIN64}
+    'libcrypto-3-x64.dll',
+    {$ELSE}
+    'libcrypto-3.dll',
+    {$ENDIF}
+    // OpenSSL v1.1.x
+    {$IFDEF WIN64}
+    'libcrypto-1_1-x64.dll',
+    {$ELSE}
+    'libcrypto-1_1.dll',
+    {$ENDIF}
+    // OpenSSL v1.0.2 distinct names for x64 and x86
+    {$IFDEF WIN64}
+    'libeay32-x64.dll',
+    {$ELSE}
+    'libeay32-x86.dll',
+    {$ENDIF}
+    // OpenSSL v1.0.2
+    'libeay32.dll',
+    // OpenSSL (ancient)
+    'libeay32.dll'
+  );
+{$ENDIF}
 {$ENDIF}
 
 type
@@ -1171,7 +1222,6 @@ var
 {$ENDIF}
 {$ENDIF}
 
-
 var
   SSLCS: TCriticalSection;
   SSLloaded: boolean = false;
@@ -1938,7 +1988,7 @@ end;
 function d2iX509bio(b: PBIO; x: PX509): PX509; {pf}
 begin
   if InitSSLInterface {$IFNDEF STATIC}and Assigned(_d2iX509bio){$ENDIF} then
-    Result := _d2iX509bio(x,b)
+    Result := _d2iX509bio(b, x)
   else
     Result := nil;
 end;
@@ -2080,10 +2130,22 @@ begin
 end;
 {$ENDIF}
 
+function GetLibFileName(Handle: THandle): string;
+var
+  n: integer;
+begin
+  n := MAX_PATH + 1024;
+  SetLength(Result, n);
+  n := GetModuleFilename(Handle, PChar(Result), n);
+  SetLength(Result, n);
+end;
+
 function InitSSLInterface: Boolean;
+{$IFDEF MSWINDOWS}
 var
   s: string;
-  x: integer;
+  i: integer;
+{$ENDIF}
 begin
   {pf}
   if SSLLoaded then
@@ -2103,25 +2165,24 @@ begin
       SSLLibHandle := 1;
       SSLUtilHandle := 1;
 {$ELSE}
-
-    {$IFDEF MSWINDOWS}
-      SSLUtilHandle := LoadLib(DLL_LIBCRYPTO_1_1);
-      SSLLibHandle := LoadLib(DLL_LIBSSL_1_1);
-
-      if (SSLUtilHandle = 0) or (SSLLibHandle = 0) then
+      // Note: It's important to ensure that the libraries both come from the
+      // same directory, preferably the one of the executable. Otherwise a
+      // version mismatch could easily occur.
+      {$IFDEF MSWINDOWS}
+      for i := 0 to Pred(LibCount) do
       begin
-        FreeLibrary(SSLLibHandle);
-        FreeLibrary(SSLUtilHandle);
-        
-        SSLUtilHandle := LoadLib(DLLUtilName);
-        SSLLibHandle := LoadLib(DLLSSLName);
-        if (SSLLibHandle = 0) then
-          SSLLibHandle := LoadLib(DLLSSLName2);
+        SSLUtilHandle := LoadLib(CryptoLibNames[i]);
+        if SSLUtilHandle <> 0 then
+        begin
+          s := ExtractFilePath(GetLibFileName(SSLUtilHandle));
+          SSLLibHandle := LoadLib(s + SSLLibNames[i]);
+          Break;
+        end;
       end;
-    {$ELSE}
+      {$ELSE}
       SSLUtilHandle := LoadLib(DLLUtilName);
       SSLLibHandle := LoadLib(DLLSSLName);
-    {$ENDIF}
+      {$ENDIF}
 {$ENDIF}
       if (SSLLibHandle <> 0) and (SSLUtilHandle <> 0) then
       begin
@@ -2240,14 +2301,8 @@ begin
         OPENSSLaddallalgorithms;
         RandScreen;
 {$ELSE}
-        SetLength(s, 1024);
-        x := GetModuleFilename(SSLLibHandle,PChar(s),Length(s));
-        SetLength(s, x);
-        SSLLibFile := s;
-        SetLength(s, 1024);
-        x := GetModuleFilename(SSLUtilHandle,PChar(s),Length(s));
-        SetLength(s, x);
-        SSLUtilFile := s;
+        SSLLibFile := GetLibFileName(SSLLibHandle);
+        SSLUtilFile := GetLibFileName(SSLUtilHandle);
         //init library
         {$IFNDEF STATIC}if assigned(_SslLibraryInit) then{$ENDIF}
           _SslLibraryInit;

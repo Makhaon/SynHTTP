@@ -1,9 +1,9 @@
 {==============================================================================|
-| Project : Ararat Synapse                                       | 001.003.001 |
+| Project : Ararat Synapse                                       | 001.004.000 |
 |==============================================================================|
 | Content: Utils for FreePascal compatibility                                  |
 |==============================================================================|
-| Copyright (c)1999-2013, Lukas Gebauer                                        |
+| Copyright (c)1999-2022, Lukas Gebauer                                        |
 | All rights reserved.                                                         |
 |                                                                              |
 | Redistribution and use in source and binary forms, with or without           |
@@ -38,6 +38,7 @@
 |==============================================================================|
 | Contributor(s):                                                              |
 |   Tomas Hajny (OS2 support)                                                  |
+|   Projeto ACBr                                                               |
 |==============================================================================|
 | History: see HISTORY.HTM from distribution package                           |
 |          (Found at URL: http://www.ararat.cz/synapse/)                       |
@@ -131,7 +132,6 @@ function GetModuleFileName(Module: TLibHandle; Buffer: PChar; BufLen: Integer): 
 begin
   Result := 0;
 end;
-
 {$ELSE}
 {$ENDIF}
 
@@ -146,7 +146,6 @@ begin
 {$ELSE}
   sysutils.sleep(milliseconds);
 {$ENDIF}
-
 end;
 
 end.

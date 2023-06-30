@@ -54,6 +54,10 @@ Used RFC: RFC-1305, RFC-2030
 {$Q-}
 {$H+}
 
+{$IFDEF NEXTGEN}
+  {$ZEROBASEDSTRINGS OFF}
+{$ENDIF}
+
 unit sntpsend;
 
 interface

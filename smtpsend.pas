@@ -589,7 +589,7 @@ end;
 function TSMTPSend.MailTo(const Value: string): Boolean;
 begin
   FSock.SendString('RCPT TO: <' + Value + '>' + CRLF);
-  Result := ReadResult = 250;
+  Result := ReadResult div 100 = 2;
 end;
 
 function TSMTPSend.MailData(const Value: TStrings): Boolean;

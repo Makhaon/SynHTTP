@@ -1,5 +1,5 @@
 {==============================================================================|
-| Project : Ararat Synapse                                       | 001.001.004 |
+| Project : Ararat Synapse                                       | 001.001.005 |
 |==============================================================================|
 | Content: Socket Independent Platform Layer - Delphi Posix definition include |
 |==============================================================================|
@@ -45,10 +45,11 @@
 
 {:@exclude}
 
+{$WARN UNIT_PLATFORM OFF}
+{$WARN SYMBOL_PLATFORM OFF}
+
 {$IFDEF POSIX}
 {for delphi XE2+}
-
-{$WARN SYMBOL_PLATFORM OFF}
 
 //{$DEFINE FORCEOLDAPI}
 {Note about define FORCEOLDAPI:
@@ -65,7 +66,6 @@ partially compatible with NextGen Delphi compiler - iOS
 
 
 }
-
 
 interface
 
@@ -92,9 +92,7 @@ const
 type
   TSocket = longint;
   TAddrFamily = integer;
-
   TMemory = pointer;
-
 
 type
   TFDSet = fd_set;
@@ -242,7 +240,11 @@ const
   AF_UNSPEC       = Posix.SysSocket.AF_UNSPEC;// 0;               { unspecified }
   AF_INET         = Posix.SysSocket.AF_INET;  // 2;               { internetwork: UDP, TCP, etc. }
   AF_INET6        = Posix.SysSocket.AF_INET6; // !! 30            { Internetwork Version 6 }
+  {$IF DECLARED(Posix.SysSocket.AF_MAX)}
   AF_MAX          = Posix.SysSocket.AF_MAX;   // !! - variable by OS
+  {$Else}
+  AF_MAX = 43; //not declared for Android
+  {$IfEnd}
 
 { Protocol families, same as address families for now. }
   PF_UNSPEC       = AF_UNSPEC;
@@ -359,9 +361,13 @@ var
   SockEnhancedApi: Boolean;
   SockWship6Api: Boolean;
 
+{$IFDEF MACOS}
+   {$DEFINE SOCK_HAS_SINLEN} // OSX
+{$ENDIF}
+
 type
   TVarSin = packed record
-  {$IF defined(MACOS32) OR defined(IOS))}
+  {$ifdef SOCK_HAS_SINLEN}
      sin_len     : UInt8;
   {$endif}
 
@@ -371,7 +377,7 @@ type
         case sin_family: sa_family_t of
           AF_INET: (sin_port: word;
                     sin_addr: TInAddr;
-                    sin_zero: array[0..7] of Byte);
+                    sin_zero: array[0..7] of byte);
           AF_INET6: (sin6_port:     word;
                 		sin6_flowinfo: FixedUInt;
       	    	      sin6_addr:     TInAddr6;
@@ -474,6 +480,13 @@ begin
   a^.s6_addr[15] := 1;
 end;
 
+{$IFDEF NEXTGEN}
+function GetHostByName(const name: string):Phostent;
+begin
+  Result := Posix.NetDB.gethostbyname(MarshaledAString(TMarshal.AsAnsi(name)));
+end;
+{$ENDIF}
+
 {=============================================================================}
 
 function WSAStartup(wVersionRequired: Word; var WSData: TWSAData): Integer;
@@ -571,14 +584,27 @@ begin
 end;
 
 function GetHostName: string;
+const
+  cMaxHostLength = 255;
+{$IFDEF NEXTGEN}
 var
-  name: TBytes;
+  name: TArray<Byte>;
 begin
-  SetLength(name, 256);
-  fillchar(name[0],sizeof(name),0);
-  if Posix.Unistd.GetHostName(@name[0], length(name))=0 then
-   result := Uppercase(StringOf(name)) else
-   result := 'LOCALHOST';
+  Result := '';
+  SetLength(name, cMaxHostLength);
+  if Posix.Unistd.GetHostName(MarshaledAString(name), cMaxHostLength) = 0 then
+    Result := TEncoding.UTF8.GetString(name).ToUpper
+{$ELSE}
+var
+  s: AnsiString;
+begin
+  Result := '';
+  setlength(s, cMaxHostLength);
+  Posix.Unistd.GetHostName(PAnsiChar(s), Length(s) - 1);
+  Result := PChar(string(s));
+{$ENDIF}
+  if Result = '' then
+    Result := cLocalHostStr;
 end;
 
 function Send(s: TSocket; Buf: TMemory; len, flags: Integer): Integer;
@@ -694,12 +720,6 @@ begin
     Result := (Family = AF_INET6) and SockWship6Api;
 end;
 
-function gethostbyname(name: pointer): PHostEnt; cdecl;
-  external libc name _PU + 'gethostbyname';
-
-function gethostbyaddr(var addr; len: socklen_t; atype: integer): PHostEnt; cdecl;
-  external libc name _PU + 'gethostbyaddr';
-
 function SetVarSin(var Sin: TVarSin; IP, Port: string; Family, SockProtocol, SockType: integer; PreferIP4: Boolean): integer;
 var
   ProtoEnt: PProtoEnt;
@@ -713,7 +733,10 @@ var
   function GetAddr(const IP, port: string; Hints: AddrInfo; var Sin: TVarSin): integer;
   var
     Addr: PAddrInfo;
+    aIP,aPort : AnsiString;
   begin
+    aIP:=Utf8Encode(IP);
+    aPort:=Utf8Encode(Port);
     Addr := nil;
     try
       FillChar(Sin, Sizeof(Sin), 0);
@@ -721,23 +744,25 @@ var
       begin
         Hints.ai_socktype := 0;
         Hints.ai_protocol := 0;
-        Result := GetAddrInfo(MarshaledAString(TMarshal.AsAnsi(IP)), nil, Hints, Addr);
+        Result := GetAddrInfo(PAnsiChar(aIP), nil, Hints, Addr);
       end
       else
       begin
         if (IP = cAnyHost) or (IP = c6AnyHost) then
         begin
           Hints.ai_flags := AI_PASSIVE;
-          Result := GetAddrInfo(nil, MarshaledAString(TMarshal.AsAnsi(Port)), Hints, Addr);
+          Result := GetAddrInfo(nil, PAnsiChar(aPort), Hints, Addr);
         end
         else
           if (IP = cLocalhost) or (IP = c6Localhost) then
           begin
-            Result := GetAddrInfo(nil, MarshaledAString(TMarshal.AsAnsi(Port)), Hints, Addr);
+            Result := GetAddrInfo(nil, PAnsiChar(aPort), Hints, Addr);
           end
           else
           begin
-            Result := GetAddrInfo(MarshaledAString(TMarshal.AsAnsi(IP)), MarshaledAString(TMarshal.AsAnsi(Port)), Hints, Addr);
+            //for Android see code in System.Net.Socket TIPAddress.LookupName
+           // Result :=  getaddrinfo(M.AsUTF8(TURI.UnicodeToIDNA(aIP)).ToPointer, nil, Hints, Addr);
+            Result := GetAddrInfo(PAnsiChar(aIP), PAnsiChar(aPort), Hints, Addr);
           end;
       end;
       if Result = 0 then
@@ -838,12 +863,12 @@ end;
 
 function GetSinIP(Sin: TVarSin): string;
 var
-  p: pointer;
+  p: PAnsiChar;
   hostlen, servlen: integer;
   r: integer;
   sa:sockaddr absolute Sin;
   byHost, byServ: TBytes;
-  HostWrapper, ServWrapper: Pointer;
+  HostWrapper, ServWrapper: TPtrWrapper;
 begin
   Result := '';
   if not IsNewApi(Sin.AddressFamily) then
@@ -859,12 +884,12 @@ begin
     servlen := NI_MAXSERV;
     Setlength(byHost, hostLen);
     Setlength(byServ, hostLen);
-    HostWrapper := @byHost[0];
-    ServWrapper := @byServ[0];
-    r := getnameinfo(sa, SizeOfVarSin(sin), HostWrapper, hostlen,
-      ServWrapper, servlen, NI_NUMERICHOST + NI_NUMERICSERV);
+    HostWrapper := TPtrWrapper.Create(@byHost[0]);
+    ServWrapper := TPtrWrapper.Create(@byServ[0]);
+    r := getnameinfo(sa, SizeOfVarSin(sin), HostWrapper.ToPointer, hostlen,
+      ServWrapper.ToPointer, servlen, NI_NUMERICHOST + NI_NUMERICSERV);
     if r = 0 then
-      Result := MarshaledAString(HostWrapper);
+      Result := TMarshal.ReadStringAsAnsi(HostWrapper{, NI_MAXHOST});
   end;
 end;
 
@@ -981,7 +1006,7 @@ var
   ServEnt: PServEnt;
   Hints: AddrInfo;
   Addr: PAddrInfo;
-  _Addr: AddrInfo;
+  //_Addr: AddrInfo;
   r: integer;
 begin
   Result := 0;
@@ -1029,7 +1054,7 @@ function ResolveIPToName(IP: string; Family, SockProtocol, SockType: integer): s
 var
   Hints: AddrInfo;
   Addr: PAddrInfo;
-  _Addr: AddrInfo;
+  //_Addr: AddrInfo;
   r: integer;
   host, serv: TBytes;
   hostlen, servlen: integer;

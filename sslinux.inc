@@ -64,11 +64,13 @@ interface
 uses
   SyncObjs, SysUtils, Classes,
   synafpc,
-  {$IFNDEF FPC}
-  Libc;
-  {$ELSE FPC}
-  libclite;
-  {$ENDIF ~FPC}
+  {$IFDEF POSIX} //even POSIX should use new ssPosix module instead...
+    Posix.Errno,
+    Posix.Signal,
+    Posix.NetDB
+  {$ELSE}
+    Libc
+  {$ENDIF};
 
 function InitSocketInterface(stack: string): Boolean;
 function DestroySocketInterface: Boolean;
@@ -83,6 +85,9 @@ type
   u_long = Longint;
   pu_long = ^u_long;
   pu_short = ^u_short;
+  {$IFDEF POSIX}
+    uint32_t = UInt32;
+  {$ENDIF}
   TSocket = u_int;
   TAddrFamily = integer;
 
@@ -152,9 +157,9 @@ type
       0: (sin_family: u_short;
           sin_port: u_short;
           sin_addr: TInAddr;
-          sin_zero: array[0..7] of Char);
+          sin_zero: array[0..7] of byte);
       1: (sa_family: u_short;
-          sa_data: array[0..13] of Char)
+          sa_data: array[0..13] of byte)
   end;
 
   TIP_mreq =  record
@@ -607,7 +612,7 @@ type
         case sin_family: u_short of
           AF_INET: (sin_port: u_short;
                     sin_addr: TInAddr;
-                    sin_zero: array[0..7] of Char);
+                    sin_zero: array[0..7] of byte);
           AF_INET6: (sin6_port:     u_short;
                 		sin6_flowinfo: u_long;
       	    	      sin6_addr:     TInAddr6;
@@ -1219,7 +1224,11 @@ begin
     begin
       SockEnhancedApi := False;
       SockWship6Api := False;
-      Signal(SIGPIPE, TSignalHandler(SIG_IGN));
+      {$IfDef POSIX}
+        Signal(SIGPIPE, TSignalHandler(SIG_IGN));
+      {$Else}
+        Libc.Signal(Libc.SIGPIPE, TSignalHandler(Libc.SIG_IGN));
+      {$EndIf}
       LibHandle := LoadLibrary(PChar(Stack));
       if LibHandle <> 0 then
       begin

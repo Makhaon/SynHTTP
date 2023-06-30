@@ -42,7 +42,7 @@
 |          (Found at URL: http://www.ararat.cz/synapse/)                       |
 |==============================================================================}
 
-{:@abstract(IP address support procedures and functions)}
+{:@abstract(IP adress support procedures and functions)}
 
 {$IFDEF FPC}
   {$MODE DELPHI}
@@ -65,9 +65,9 @@ uses
   SysUtils, SynaUtil;
 
 type
-{:binary form of IPv6 address (for string conversion routines)}
+{:binary form of IPv6 adress (for string conversion routines)}
   TIp6Bytes = array [0..15] of Byte;
-{:binary form of IPv6 address (for string conversion routines)}
+{:binary form of IPv6 adress (for string conversion routines)}
   TIp6Words = array [0..7] of Word;
 
 {:Returns @TRUE, if "Value" is a valid IPv4 address. Cannot be a symbolic Name!}
