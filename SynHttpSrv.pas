@@ -1993,7 +1993,7 @@ end;
 
 procedure THttpRequest.SetStrProp(Index: integer; const Value: string);
 var
- i: integer;
+ i: int64;
 begin
  if (Index >= 0) and (Index <= High(StrPropNames)) then
   case Index of
@@ -2011,7 +2011,7 @@ begin
    18:
    begin
     i := 0;
-    if TryStrToInt(Value, i) and (i > 0) then
+    if TryStrToInt64(Value, i) and (i > 0) then
      Headers[StrPropNames[Index]] := Value;
    end
    else
