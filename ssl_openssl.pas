@@ -1012,7 +1012,7 @@ end;
 {==============================================================================}
 
 initialization
-//  if InitSSLInterface then
+  if InitSSLInterface then
     SSLImplementation := TSSLOpenSSL;
 
 end.

@@ -6,8 +6,8 @@
         <MainSource>Project2.dpr</MainSource>
         <Base>True</Base>
         <Config Condition="'$(Config)'==''">Debug</Config>
-        <Platform Condition="'$(Platform)'==''">Win32</Platform>
-        <TargetedPlatforms>1</TargetedPlatforms>
+        <Platform Condition="'$(Platform)'==''">Win64</Platform>
+        <TargetedPlatforms>3</TargetedPlatforms>
         <AppType>Application</AppType>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
@@ -60,6 +60,11 @@
         <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win64)'!=''">
+        <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;$(DCC_Namespace)</DCC_Namespace>
+        <VerInfo_Locale>1033</VerInfo_Locale>
+        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
         <DCC_UsePackage>vquery200;IndyProtocols200;pgprovider200;FireDACSqliteDriver;DBXSqliteDriver;FireDACPgDriver;accessprovider200;fmx;uniGUI20Core;TeeDB;tethering;vclib;DBXInterBaseDriver;mongoprovider200;DbxCommonDriver;crcontrols200;vclimg;dbxcds;IndySystem200;dbfprovider200;tdsprovider200;vcldb;vcldsnap;liteprovider200;uniGUI20VCL;odbcprovider200;fmxFireDAC;dacvcl200;CustomIPTransport;JvCore;RVDBPkgDXE6;vclribbon;adsprovider200;dsnap;fmxase;vcl;dacfmx200;oraprovider200;CloudService;FmxTeeUI;FireDACIBDriver;soapserver;inetdbxpress;dsnapxml;uSynEdit_R2016;adortl;FireDACASADriver;aseprovider200;AviPack;uniTools20;bindcompfmx;FireDACODBCDriver;RESTBackendComponents;rtl;dbrtl;DbxClientDriver;DSPack_DXE2;FireDACCommon;bindcomp;inetdb;IndyCore200;dac200;uniGUI20;Tee;vclFireDAC;xmlrtl;ibxpress;uniGUI20m;DBXMySQLDriver;FireDACCommonDriver;bindcompdbx;soaprtl;bindengine;vclactnband;FMXTee;TeeUI;bindcompvcl;ibprovider200;db2provider200;unidacvcl200;vclie;unidacfmx200;FireDACADSDriver;vcltouch;unidac200;myprovider200;PngComponents;uIndy20;VclSmp;FireDAC;VCLRESTComponents;CoolTrayIconD16;Intraweb;dsnapcon;uniGUI20Chart;inet;fmxobj;FireDACMySQLDriver;soapmidas;vclx;fmxdae;RESTComponents;FireDACMSAccDriver;dbexpress;SpTBXLib;JvBDE;$(DCC_UsePackage)</DCC_UsePackage>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1)'!=''">
@@ -111,7 +116,7 @@
             <Deployment/>
             <Platforms>
                 <Platform value="Win32">True</Platform>
-                <Platform value="Win64">False</Platform>
+                <Platform value="Win64">True</Platform>
             </Platforms>
         </BorlandProject>
         <ProjectFileVersion>12</ProjectFileVersion>

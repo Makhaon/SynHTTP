@@ -3,13 +3,27 @@ unit Unit2;
 interface
 
 uses
- Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
- Vcl.Controls, Vcl.Forms, Vcl.Dialogs, SynHttpSrv, Vcl.StdCtrls, SynSrv;
+ Winapi.Windows,
+ Winapi.Messages,
+ System.SysUtils,
+ System.Variants,
+ System.Classes,
+ Vcl.Graphics,
+ Vcl.Controls,
+ Vcl.Forms,
+ Vcl.Dialogs,
+ SynHttpSrv,
+ ssl_openssl_lib,
+ ssl_openssl,
+ Vcl.StdCtrls,
+ SynSrv;
 
 type
  TForm2 = class(TForm)
-  Button1: TButton;
+  Button1:   TButton;
+  CheckBox1: TCheckBox;
   procedure Button1Click(Sender: TObject);
+  procedure CheckBox1Click(Sender: TObject);
  private
   FSynHttpServer: TSynHttpServer;
   { Private declarations }
@@ -49,7 +63,22 @@ begin
  FSynHttpServer := TSynHttpServer.Create(Self);
  FSynHttpServer.OnHttpGet := SynHttpServer1HttpGet;
  FSynHttpServer.Port := '8080';
+ FSynHttpServer.HTTPSEnabled := CheckBox1.Checked;
  TryToOpenWebPort;
+ if FSynHttpServer.Active then
+  FSynHttpServer.InitHttps('server.crt', 'server.key', 'w1z2rd', '');
+end;
+
+procedure TForm2.CheckBox1Click(Sender: TObject);
+begin
+ if CheckBox1.Checked then
+  if InitSSLInterface then
+   ShowMessage('SSL initialized')
+  else
+  begin
+   ShowMessage('SSL does not initialized');
+   CheckBox1.Checked := False;
+  end;
 end;
 
 procedure TForm2.SynHttpServer1HttpGet(Sender: TObject; Connection: TSynTcpSrvConnection;

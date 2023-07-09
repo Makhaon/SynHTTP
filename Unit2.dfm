@@ -14,12 +14,21 @@ object Form2: TForm2
   PixelsPerInch = 96
   TextHeight = 13
   object Button1: TButton
-    Left = 208
-    Top = 96
+    Left = 16
+    Top = 56
     Width = 75
     Height = 25
-    Caption = 'Button1'
+    Caption = 'Start server'
     TabOrder = 0
     OnClick = Button1Click
+  end
+  object CheckBox1: TCheckBox
+    Left = 16
+    Top = 24
+    Width = 97
+    Height = 17
+    Caption = 'Enable SSL mode'
+    TabOrder = 1
+    OnClick = CheckBox1Click
   end
 end

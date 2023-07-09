@@ -323,9 +323,9 @@ type
     FNonBlockMode: Boolean;
     FMaxLineLength: Integer;
     FMaxSendBandwidth: Integer;
-    FNextSend: FixedUInt;
+    FNextSend: UInt32;
     FMaxRecvBandwidth: Integer;
-    FNextRecv: FixedUInt;
+    FNextRecv: UInt32;
     FConvertLineEnd: Boolean;
     FLastCR: Boolean;
     FLastLF: Boolean;
@@ -377,7 +377,7 @@ type
     procedure DoMonitor(Writing: Boolean; const Buffer: TMemory; Len: Integer);
     procedure DoCreateSocket;
     procedure DoHeartbeat;
-    procedure LimitBandwidth(Length: Integer; MaxB: integer; var Next: FixedUInt);
+    procedure LimitBandwidth(Length: Integer; MaxB: integer; var Next: UInt32);
     procedure SetBandwidth(Value: Integer);
     function TestStopFlag: Boolean;
     procedure InternalSendStream(const Stream: TStream; WithSize, Indy: boolean); virtual;
@@ -1509,9 +1509,9 @@ type
     TTL: Byte;
     Protocol: Byte;
     CheckSum: Word;
-    SourceIp: FixedUInt;
-    DestIp: FixedUInt;
-    Options: FixedUInt;
+    SourceIp: UInt32;
+    DestIp: UInt32;
+    Options: UInt32;
   end;
 
   {:@abstract(Parent class of application protocol implementations.)
@@ -1858,7 +1858,8 @@ procedure TBlockSocket.DelayedOption(const Value: TSynaOption);
 begin
   if FSocket = INVALID_SOCKET then
   begin
-    FDelayedOptions := FDelayedOptions + [Value];
+    SetLength(FDelayedOptions, Length(FDelayedOptions) + 1);
+    FDelayedOptions[High(FDelayedOptions)] := Value;
   end
   else
     SetDelayedOption(Value);
@@ -2112,10 +2113,10 @@ begin
   MaxRecvBandwidth := Value;
 end;
 
-procedure TBlockSocket.LimitBandwidth(Length: Integer; MaxB: integer; var Next: FixedUInt);
+procedure TBlockSocket.LimitBandwidth(Length: Integer; MaxB: integer; var Next: UInt32);
 var
-  x: FixedUInt;
-  y: FixedUInt;
+  x: UInt32;
+  y: UInt32;
   n: integer;
 begin
   if FStopFlag then
@@ -2355,7 +2356,7 @@ function TBlockSocket.RecvBufferEx(Buffer: TMemory; Len: Integer;
 var
   s: TSynaBytes;
   rl, l: integer;
-  ti: FixedUInt;
+  ti: UInt32;
 {$IFDEF CIL}
   n: integer;
   b: TMemory;
@@ -2528,7 +2529,7 @@ var
   CorCRLF: Boolean;
   t: string;
   tl: integer;
-  ti: FixedUInt;
+  ti: UInt32;
 begin
   ResetLastError;
   Result := '';

@@ -71,7 +71,7 @@ type
  TCommandHandler = procedure(Connection: TSynTcpSrvConnection; Command: string) of object;
 
  // TSynTcpServer - Generic TCP server component
- [ComponentPlatformsAttribute(pidAllPlatforms)]
+ [ComponentPlatformsAttribute(pidWin32 or pidWin64)]
  TSynTcpServer = class(TComponent)
  protected
   FActive:        boolean;

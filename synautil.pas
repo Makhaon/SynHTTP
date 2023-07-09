@@ -102,6 +102,7 @@ uses
 type
   int64 = integer;
 {$ENDIF}
+
 {$IFDEF POSIX}
 type
   TTimeVal = Posix.SysTime.timeval;
@@ -181,11 +182,11 @@ function SetUTTime(Newdt: TDateTime): Boolean;
 
 {:Return current value of system timer with precizion 1 millisecond. Good for
  measure time difference.}
-function GetTick: FixedUInt;
+function GetTick: UInt32;
 
 {:Return difference between two timestamps. It working fine only for differences
  smaller then maxint. (difference must be smaller then 24 days.)}
-function TickDelta(TickOld, TickNew: FixedUInt): FixedUInt;
+function TickDelta(TickOld, TickNew: UInt32): UInt32;
 
 {:Return two characters, which ordinal values represents the value in byte
  format. (High-endian)}
@@ -910,7 +911,7 @@ end;
 {==============================================================================}
 
 {$IFNDEF MSWINDOWS}
-function GetTick: FixedUInt;
+function GetTick: UInt32;
 var
   Stamp: TTimeStamp;
 begin
@@ -918,7 +919,7 @@ begin
   Result := Stamp.Time;
 end;
 {$ELSE}
-function GetTick: FixedUInt;
+function GetTick: UInt32;
 var
   tick, freq: TLargeInteger;
 {$IFDEF VER100}
@@ -932,7 +933,7 @@ begin
     x.QuadPart := (tick.QuadPart / freq.QuadPart) * 1000;
     Result := x.LowPart;
 {$ELSE}
-    Result := Trunc((tick / freq) * 1000) and High(FixedUInt)
+    Result := Trunc((tick / freq) * 1000) and High(UInt32)
 {$ENDIF}
   end
   else
@@ -942,7 +943,7 @@ end;
 
 {==============================================================================}
 
-function TickDelta(TickOld, TickNew: FixedUInt): FixedUInt;
+function TickDelta(TickOld, TickNew: UInt32): UInt32;
 begin
 //if DWord is signed type (older Deplhi),
 // then it not work properly on differencies larger then maxint!
@@ -951,8 +952,8 @@ begin
   begin
     if TickNew < TickOld then
     begin
-      TickNew := TickNew + FixedUInt(MaxInt) + 1;
-      TickOld := TickOld + FixedUInt(MaxInt) + 1;
+      TickNew := TickNew + UInt32(MaxInt) + 1;
+      TickOld := TickOld + UInt32(MaxInt) + 1;
     end;
     Result := TickNew - TickOld;
     if TickNew < TickOld then
