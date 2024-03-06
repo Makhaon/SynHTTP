@@ -923,6 +923,7 @@ begin
   Result := False;
   SMTP := TSMTPSend.Create;
   try
+  try
 // if you need SOCKS5 support, uncomment next lines:
     // SMTP.Sock.SocksIP := '127.0.0.1';
     // SMTP.Sock.SocksPort := '1080';
@@ -955,6 +956,9 @@ begin
     end;
   finally
     SMTP.Free;
+  end;
+  except
+   Exit(False);
   end;
 end;
 

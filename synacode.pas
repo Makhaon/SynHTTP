@@ -130,110 +130,110 @@ const
 
 {:Decodes triplet encoding with a given character delimiter. It is used for
  decoding quoted-printable or URL encoding.}
-function DecodeTriplet(const Value: String; Delimiter: Char): String;
+function DecodeTriplet(const Value: AnsiString; Delimiter: AnsiChar): AnsiString;
 
 {:Decodes a string from quoted printable form. (also decodes triplet sequences
  like '=7F')}
-function DecodeQuotedPrintable(const Value: String): String;
+function DecodeQuotedPrintable(const Value: AnsiString): AnsiString;
 
 {:Decodes a string of URL encoding. (also decodes triplet sequences like '%7F')}
-function DecodeURL(const Value: String): String;
+function DecodeURL(const Value: AnsiString): AnsiString;
 
 {:Performs triplet encoding with a given character delimiter. Used for encoding
  quoted-printable or URL encoding.}
-function EncodeTriplet(const Value: String; Delimiter: Char;
-  Specials: TSpecials): String;
+function EncodeTriplet(const Value: AnsiString; Delimiter: AnsiChar;
+  Specials: TSpecials): AnsiString;
 
 {:Encodes a string to triplet quoted printable form. All @link(NonAsciiChar)
  are encoded.}
-function EncodeQuotedPrintable(const Value: String): String;
+function EncodeQuotedPrintable(const Value: AnsiString): AnsiString;
 
 {:Encodes a string to triplet quoted printable form. All @link(NonAsciiChar) and
  @link(SpecialChar) are encoded.}
-function EncodeSafeQuotedPrintable(const Value: String): String;
+function EncodeSafeQuotedPrintable(const Value: AnsiString): AnsiString;
 
 {:Encodes a string to URL format. Used for encoding data from a form field in
  HTTP, etc. (Encodes all critical characters including characters used as URL
  delimiters ('/',':', etc.)}
-function EncodeURLElement(const Value: String): String;
+function EncodeURLElement(const Value: AnsiString): AnsiString;
 
 {:Encodes a string to URL format. Used to encode critical characters in all
  URLs.}
-function EncodeURL(const Value: String): String;
+function EncodeURL(const Value: AnsiString): AnsiString;
 
 {:Decode 4to3 encoding with given table. If some element is not found in table,
  first item from table is used. This is good for buggy coded items by Microsoft
  Outlook. This software sometimes using wrong table for UUcode, where is used
  ' ' instead '`'.}
-function Decode4to3(const Value, Table: String): String;
+function Decode4to3(const Value, Table: AnsiString): AnsiString;
 
 {:Decode 4to3 encoding with given REVERSE table. Using this function with
 reverse table is much faster then @link(Decode4to3). This function is used
 internally for Base64, UU or XX decoding.}
-function Decode4to3Ex(const Value, Table: String): String;
+function Decode4to3Ex(const Value, Table: AnsiString): AnsiString;
 
 {:Encode by system 3to4 (used by Base64, UU coding, etc) by given table.}
-function Encode3to4(const Value, Table: String): String;
+function Encode3to4(const Value, Table: AnsiString): AnsiString;
 
 {:Decode string from base64 format.}
-function DecodeBase64(const Value: String): String;
+function DecodeBase64(const Value: AnsiString): AnsiString;
 
 {:Encodes a string to base64 format.}
-function EncodeBase64(const Value: String): String;
+function EncodeBase64(const Value: AnsiString): AnsiString;
 
 {:Decode string from modified base64 format. (used in IMAP, for example.)}
-function DecodeBase64mod(const Value: String): String;
+function DecodeBase64mod(const Value: AnsiString): AnsiString;
 
 {:Encodes a string to  modified base64 format. (used in IMAP, for example.)}
-function EncodeBase64mod(const Value: String): String;
+function EncodeBase64mod(const Value: AnsiString): AnsiString;
 
 {:Decodes a string from UUcode format.}
-function DecodeUU(const Value: String): String;
+function DecodeUU(const Value: AnsiString): AnsiString;
 
 {:encode UUcode. it encode only datas, you must also add header and footer for
  proper encode.}
-function EncodeUU(const Value: String): String;
+function EncodeUU(const Value: AnsiString): AnsiString;
 
 {:Decodes a string from XXcode format.}
-function DecodeXX(const Value: String): String;
+function DecodeXX(const Value: AnsiString): AnsiString;
 
 {:decode line with Yenc code. This code is sometimes used in newsgroups.}
-function DecodeYEnc(const Value: String): String;
+function DecodeYEnc(const Value: AnsiString): AnsiString;
 
 {:Returns a new CRC32 value after adding a new byte of data.}
 function UpdateCrc32(Value: Byte; Crc32: Cardinal): Cardinal;
 
 {:return CRC32 from a value string.}
-function Crc32(const Value: String): Cardinal;
+function Crc32(const Value: AnsiString): Cardinal;
 
 {:Returns a new CRC16 value after adding a new byte of data.}
 function UpdateCrc16(Value: Byte; Crc16: Word): Word;
 
 {:return CRC16 from a value string.}
-function Crc16(const Value: String): Word;
+function Crc16(const Value: AnsiString): Word;
 
 {:Returns a binary string with a RSA-MD5 hashing of "Value" string.}
-function MD5(const Value: String): String;
+function MD5(const Value: AnsiString): AnsiString;
 
 {:Returns a binary string with HMAC-MD5 hash.}
-function HMAC_MD5(const Text: String; Key: String): String;
+function HMAC_MD5(Text, Key: AnsiString): AnsiString;
 
 {:Returns a binary string with a RSA-MD5 hashing of string what is constructed
  by repeating "value" until length is "Len".}
-function MD5LongHash(const Value: String; Len: integer): String;
+function MD5LongHash(const Value: AnsiString; Len: integer): AnsiString;
 
 {:Returns a binary string with a SHA-1 hashing of "Value" string.}
-function SHA1(const Value: String): String;
+function SHA1(const Value: AnsiString): AnsiString;
 
 {:Returns a binary string with HMAC-SHA1 hash.}
-function HMAC_SHA1(const Text: String; Key: String): String;
+function HMAC_SHA1(Text, Key: AnsiString): AnsiString;
 
 {:Returns a binary string with a SHA-1 hashing of string what is constructed
  by repeating "value" until length is "Len".}
-function SHA1LongHash(const Value: String; Len: integer): String;
+function SHA1LongHash(const Value: AnsiString; Len: integer): AnsiString;
 
 {:Returns a binary string with a RSA-MD4 hashing of "Value" string.}
-function MD4(const Value: String): String;
+function MD4(const Value: AnsiString): AnsiString;
 
 implementation
 
@@ -400,10 +400,10 @@ type
 
 {==============================================================================}
 
-function DecodeTriplet(const Value: String; Delimiter: Char): String;
+function DecodeTriplet(const Value: AnsiString; Delimiter: AnsiChar): AnsiString;
 var
   x, l, lv: Integer;
-  c: Char;
+  c: AnsiChar;
   b: Byte;
   bad: Boolean;
 begin
@@ -460,7 +460,7 @@ begin
             else
             begin
               Inc(x, 2);
-              Result[l] := Char(b);
+              Result[l] := AnsiChar(b);
               Inc(l);
             end;
           end;
@@ -475,26 +475,26 @@ end;
 
 {==============================================================================}
 
-function DecodeQuotedPrintable(const Value: String): String;
+function DecodeQuotedPrintable(const Value: AnsiString): AnsiString;
 begin
   Result := DecodeTriplet(Value, '=');
 end;
 
 {==============================================================================}
 
-function DecodeURL(const Value: String): String;
+function DecodeURL(const Value: AnsiString): AnsiString;
 begin
   Result := DecodeTriplet(Value, '%');
 end;
 
 {==============================================================================}
 
-function EncodeTriplet(const Value: String; Delimiter: Char;
-  Specials: TSpecials): String;
+function EncodeTriplet(const Value: AnsiString; Delimiter: AnsiChar;
+  Specials: TSpecials): AnsiString;
 var
   n, l: Integer;
-  s: String;
-  c: Char;
+  s: AnsiString;
+  c: AnsiChar;
 begin
   SetLength(Result, Length(Value) * 3);
   l := 1;
@@ -523,35 +523,35 @@ end;
 
 {==============================================================================}
 
-function EncodeQuotedPrintable(const Value: String): String;
+function EncodeQuotedPrintable(const Value: AnsiString): AnsiString;
 begin
   Result := EncodeTriplet(Value, '=',  ['='] + NonAsciiChar);
 end;
 
 {==============================================================================}
 
-function EncodeSafeQuotedPrintable(const Value: String): String;
+function EncodeSafeQuotedPrintable(const Value: AnsiString): AnsiString;
 begin
   Result := EncodeTriplet(Value, '=', SpecialChar + NonAsciiChar);
 end;
 
 {==============================================================================}
 
-function EncodeURLElement(const Value: String): String;
+function EncodeURLElement(const Value: AnsiString): AnsiString;
 begin
   Result := EncodeTriplet(Value, '%', URLSpecialChar + URLFullSpecialChar);
 end;
 
 {==============================================================================}
 
-function EncodeURL(const Value: String): String;
+function EncodeURL(const Value: AnsiString): AnsiString;
 begin
   Result := EncodeTriplet(Value, '%', URLSpecialChar);
 end;
 
 {==============================================================================}
 
-function Decode4to3(const Value, Table: String): String;
+function Decode4to3(const Value, Table: AnsiString): AnsiString;
 var
   x, y, n, l: Integer;
   d: array[0..3] of Byte;
@@ -574,15 +574,15 @@ begin
       end;
       Inc(x);
     end;
-    Result[l] := Char((D[0] and $3F) shl 2 + (D[1] and $30) shr 4);
+    Result[l] := AnsiChar((D[0] and $3F) shl 2 + (D[1] and $30) shr 4);
     Inc(l);
     if d[2] <> 64 then
     begin
-      Result[l] := Char((D[1] and $0F) shl 4 + (D[2] and $3C) shr 2);
+      Result[l] := AnsiChar((D[1] and $0F) shl 4 + (D[2] and $3C) shr 2);
       Inc(l);
       if d[3] <> 64 then
       begin
-        Result[l] := Char((D[2] and $03) shl 6 + (D[3] and $3F));
+        Result[l] := AnsiChar((D[2] and $03) shl 6 + (D[3] and $3F));
         Inc(l);
       end;
     end;
@@ -592,7 +592,7 @@ begin
 end;
 
 {==============================================================================}
-function Decode4to3Ex(const Value, Table: String): String;
+function Decode4to3Ex(const Value, Table: AnsiString): AnsiString;
 var
   x, y, lv: Integer;
   d: integer;
@@ -620,11 +620,11 @@ begin
     dec(dl);
     if dl <> 0 then
       continue;
-    Result[p] := Char((d shr 16) and $ff);
+    Result[p] := AnsiChar((d shr 16) and $ff);
     inc(p);
-    Result[p] := Char((d shr 8) and $ff);
+    Result[p] := AnsiChar((d shr 8) and $ff);
     inc(p);
-    Result[p] := Char(d and $ff);
+    Result[p] := AnsiChar(d and $ff);
     inc(p);
     d := 0;
     dl := 4;
@@ -633,15 +633,15 @@ begin
     1:
       begin
         d := d shr 2;
-        Result[p] := Char((d shr 8) and $ff);
+        Result[p] := AnsiChar((d shr 8) and $ff);
         inc(p);
-        Result[p] := Char(d and $ff);
+        Result[p] := AnsiChar(d and $ff);
         inc(p);
       end;
     2:
       begin
         d := d shr 4;
-        Result[p] := Char(d and $ff);
+        Result[p] := AnsiChar(d and $ff);
         inc(p);
       end;
   end;
@@ -650,7 +650,7 @@ end;
 
 {==============================================================================}
 
-function Encode3to4(const Value, Table: String): String;
+function Encode3to4(const Value, Table: AnsiString): AnsiString;
 var
   c: Byte;
   n, l: Integer;
@@ -703,38 +703,38 @@ end;
 
 {==============================================================================}
 
-function DecodeBase64(const Value: String): String;
+function DecodeBase64(const Value: AnsiString): AnsiString;
 begin
   Result := Decode4to3Ex(Value, ReTableBase64);
 end;
 
 {==============================================================================}
 
-function EncodeBase64(const Value: String): String;
+function EncodeBase64(const Value: AnsiString): AnsiString;
 begin
   Result := Encode3to4(Value, TableBase64);
 end;
 
 {==============================================================================}
 
-function DecodeBase64mod(const Value: String): String;
+function DecodeBase64mod(const Value: AnsiString): AnsiString;
 begin
   Result := Decode4to3(Value, TableBase64mod);
 end;
 
 {==============================================================================}
 
-function EncodeBase64mod(const Value: String): String;
+function EncodeBase64mod(const Value: AnsiString): AnsiString;
 begin
   Result := Encode3to4(Value, TableBase64mod);
 end;
 
 {==============================================================================}
 
-function DecodeUU(const Value: String): String;
+function DecodeUU(const Value: AnsiString): AnsiString;
 var
-  s: String;
-  uut: String;
+  s: AnsiString;
+  uut: AnsiString;
   x: Integer;
 begin
   Result := '';
@@ -764,7 +764,7 @@ end;
 
 {==============================================================================}
 
-function EncodeUU(const Value: String): String;
+function EncodeUU(const Value: AnsiString): AnsiString;
 begin
   Result := '';
   if Length(Value) < Length(TableUU) then
@@ -773,9 +773,9 @@ end;
 
 {==============================================================================}
 
-function DecodeXX(const Value: String): String;
+function DecodeXX(const Value: AnsiString): AnsiString;
 var
-  s: String;
+  s: AnsiString;
   x: Integer;
 begin
   Result := '';
@@ -803,7 +803,7 @@ end;
 
 {==============================================================================}
 
-function DecodeYEnc(const Value: String): String;
+function DecodeYEnc(const Value: AnsiString): AnsiString;
 var
   C : Byte;
   i: integer;
@@ -821,7 +821,7 @@ begin
       Dec(c, 64);
     end;
     Dec(C, 42);
-    Result := Result + Char(C);
+    Result := Result + AnsiChar(C);
   end;
 end;
 
@@ -835,7 +835,7 @@ end;
 
 {==============================================================================}
 
-function Crc32(const Value: String): Cardinal;
+function Crc32(const Value: AnsiString): Cardinal;
 var
   n: Integer;
 begin
@@ -855,7 +855,7 @@ end;
 
 {==============================================================================}
 
-function Crc16(const Value: String): Word;
+function Crc16(const Value: AnsiString): Word;
 var
   n: Integer;
 begin
@@ -994,7 +994,7 @@ begin
 end;
 
 //fixed by James McAdams
-procedure MDUpdate(var MDContext: TMDCtx; const Data: String; transform: TMDTransform);
+procedure MDUpdate(var MDContext: TMDCtx; const Data: AnsiString; transform: TMDTransform);
 var
   Index, partLen, InputLen, I: integer;
 {$IFDEF SYNACODE_NATIVE}
@@ -1050,7 +1050,7 @@ begin
   end
 end;
 
-function MDFinal(var MDContext: TMDCtx; transform: TMDTransform): String;
+function MDFinal(var MDContext: TMDCtx; transform: TMDTransform): AnsiString;
 var
   Cnt: Word;
   P: Byte;
@@ -1094,14 +1094,14 @@ begin
 //    Move(State, Digest, 16);
     Result := '';
     for i := 0 to 15 do
-      Result := Result + Char(digest[i]);
+      Result := Result + AnsiChar(digest[i]);
   end;
 //  FillChar(MD5Context, SizeOf(TMD5Ctx), #0)
 end;
 
 {==============================================================================}
 
-function MD5(const Value: String): String;
+function MD5(const Value: AnsiString): AnsiString;
 var
   MDContext: TMDCtx;
 begin
@@ -1112,9 +1112,9 @@ end;
 
 {==============================================================================}
 
-function HMAC_MD5(const Text: String; Key: String): String;
+function HMAC_MD5(Text, Key: AnsiString): AnsiString;
 var
-  ipad, opad, s: String;
+  ipad, opad, s: AnsiString;
   n: Integer;
   MDContext: TMDCtx;
 begin
@@ -1124,8 +1124,8 @@ begin
   opad := StringOfChar(HMAC_MD5_OPAD_CHAR, 64);
   for n := 1 to Length(Key) do
   begin
-    ipad[n] := Char(Byte(ipad[n]) xor Byte(Key[n]));
-    opad[n] := Char(Byte(opad[n]) xor Byte(Key[n]));
+    ipad[n] := AnsiChar(Byte(ipad[n]) xor Byte(Key[n]));
+    opad[n] := AnsiChar(Byte(opad[n]) xor Byte(Key[n]));
   end;
   MDInit(MDContext);
   MDUpdate(MDContext, ipad, @MD5Transform);
@@ -1139,7 +1139,7 @@ end;
 
 {==============================================================================}
 
-function MD5LongHash(const Value: String; Len: integer): String;
+function MD5LongHash(const Value: AnsiString; Len: integer): AnsiString;
 var
   cnt, rest: integer;
   l: integer;
@@ -1270,7 +1270,7 @@ begin
 end;
 
 //******************************************************************************
-procedure SHA1Update(var Context: TSHA1Ctx; const Data: String);
+procedure SHA1Update(var Context: TSHA1Ctx; const Data: AnsiString);
 var
   Len: integer;
   n: integer;
@@ -1297,7 +1297,7 @@ begin
 end;
 
 //******************************************************************************
-function SHA1Final(var Context: TSHA1Ctx): String;
+function SHA1Final(var Context: TSHA1Ctx): AnsiString;
 type
   Pinteger = ^integer;
 var
@@ -1326,10 +1326,10 @@ begin
   ArrLongToByte(Context.Hash, Context.HashByte);
   Result := '';
   for i := 0 to 19 do
-    Result := Result + Char(Context.HashByte[i]);
+    Result := Result + AnsiChar(Context.HashByte[i]);
 end;
 
-function SHA1(const Value: String): String;
+function SHA1(const Value: AnsiString): AnsiString;
 var
   SHA1Context: TSHA1Ctx;
 begin
@@ -1340,9 +1340,9 @@ end;
 
 {==============================================================================}
 
-function HMAC_SHA1(const Text: String; Key: String): String;
+function HMAC_SHA1(Text, Key: AnsiString): AnsiString;
 var
-  ipad, opad, s: String;
+  ipad, opad, s: AnsiString;
   n: Integer;
   SHA1Context: TSHA1Ctx;
 begin
@@ -1352,8 +1352,8 @@ begin
   opad := StringOfChar(HMAC_SHA1_OPAD_CHAR, 64);
   for n := 1 to Length(Key) do
   begin
-    ipad[n] := Char(Byte(ipad[n]) xor Byte(Key[n]));
-    opad[n] := Char(Byte(opad[n]) xor Byte(Key[n]));
+    ipad[n] := AnsiChar(Byte(ipad[n]) xor Byte(Key[n]));
+    opad[n] := AnsiChar(Byte(opad[n]) xor Byte(Key[n]));
   end;
   SHA1Init(SHA1Context);
   SHA1Update(SHA1Context, ipad);
@@ -1367,7 +1367,7 @@ end;
 
 {==============================================================================}
 
-function SHA1LongHash(const Value: String; Len: integer): String;
+function SHA1LongHash(const Value: AnsiString; Len: integer): AnsiString;
 var
   cnt, rest: integer;
   l: integer;
@@ -1459,7 +1459,7 @@ end;
 
 {==============================================================================}
 
-function MD4(const Value: String): String;
+function MD4(const Value: AnsiString): AnsiString;
 var
   MDContext: TMDCtx;
 begin

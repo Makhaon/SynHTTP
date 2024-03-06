@@ -323,9 +323,9 @@ type
     FNonBlockMode: Boolean;
     FMaxLineLength: Integer;
     FMaxSendBandwidth: Integer;
-    FNextSend: UInt32;
+    FNextSend: FixedUInt;
     FMaxRecvBandwidth: Integer;
-    FNextRecv: UInt32;
+    FNextRecv: FixedUInt;
     FConvertLineEnd: Boolean;
     FLastCR: Boolean;
     FLastLF: Boolean;
@@ -377,7 +377,7 @@ type
     procedure DoMonitor(Writing: Boolean; const Buffer: TMemory; Len: Integer);
     procedure DoCreateSocket;
     procedure DoHeartbeat;
-    procedure LimitBandwidth(Length: Integer; MaxB: integer; var Next: UInt32);
+    procedure LimitBandwidth(Length: Integer; MaxB: integer; var Next: FixedUInt);
     procedure SetBandwidth(Value: Integer);
     function TestStopFlag: Boolean;
     procedure InternalSendStream(const Stream: TStream; WithSize, Indy: boolean); virtual;
@@ -1509,9 +1509,9 @@ type
     TTL: Byte;
     Protocol: Byte;
     CheckSum: Word;
-    SourceIp: UInt32;
-    DestIp: UInt32;
-    Options: UInt32;
+    SourceIp: FixedUInt;
+    DestIp: FixedUInt;
+    Options: FixedUInt;
   end;
 
   {:@abstract(Parent class of application protocol implementations.)
@@ -1858,8 +1858,7 @@ procedure TBlockSocket.DelayedOption(const Value: TSynaOption);
 begin
   if FSocket = INVALID_SOCKET then
   begin
-    SetLength(FDelayedOptions, Length(FDelayedOptions) + 1);
-    FDelayedOptions[High(FDelayedOptions)] := Value;
+    FDelayedOptions := FDelayedOptions + [Value];
   end
   else
     SetDelayedOption(Value);
@@ -2113,10 +2112,10 @@ begin
   MaxRecvBandwidth := Value;
 end;
 
-procedure TBlockSocket.LimitBandwidth(Length: Integer; MaxB: integer; var Next: UInt32);
+procedure TBlockSocket.LimitBandwidth(Length: Integer; MaxB: integer; var Next: FixedUInt);
 var
-  x: UInt32;
-  y: UInt32;
+  x: FixedUInt;
+  y: FixedUInt;
   n: integer;
 begin
   if FStopFlag then
@@ -2356,7 +2355,7 @@ function TBlockSocket.RecvBufferEx(Buffer: TMemory; Len: Integer;
 var
   s: TSynaBytes;
   rl, l: integer;
-  ti: UInt32;
+  ti: FixedUInt;
 {$IFDEF CIL}
   n: integer;
   b: TMemory;
@@ -2444,7 +2443,7 @@ begin
   begin
     {$IFDEF MSWINDOWS}
     //not drain CPU on large downloads...
-    Sleep(0);
+    Sleep(10{0});
     {$ENDIF}
     x := WaitingData;
     if x > 0 then
@@ -2529,7 +2528,7 @@ var
   CorCRLF: Boolean;
   t: string;
   tl: integer;
-  ti: UInt32;
+  ti: FixedUInt;
 begin
   ResetLastError;
   Result := '';
@@ -3507,7 +3506,7 @@ begin
           ;
         2:
           begin
-            buf := #1 + Char(Length(FSocksUsername)) + FSocksUsername +
+            Buf := #1 + Char(Length(FSocksUsername)) + FSocksUsername +
               Char(Length(FSocksPassword)) + FSocksPassword;
             SendString(Buf);
             Buf := RecvBufferStr(2, FSocksTimeout);
@@ -3531,7 +3530,7 @@ end;
 function TSocksBlockSocket.SocksRequest(Cmd: Byte;
   const IP, Port: string): Boolean;
 var
-  buf: string;
+  Buf: string;
 begin
   FBypassFlag := True;
   try
