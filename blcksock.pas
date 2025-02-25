@@ -2443,7 +2443,7 @@ begin
   begin
     {$IFDEF MSWINDOWS}
     //not drain CPU on large downloads...
-    Sleep(10{0});
+    //Sleep(10{0});
     {$ENDIF}
     x := WaitingData;
     if x > 0 then

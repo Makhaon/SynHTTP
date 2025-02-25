@@ -234,23 +234,30 @@ end;
 
 class operator TSynaBytes.Implicit(const V1: TSynaBytes): String;
 var
-  //I: Integer;
-  //C: PWord;
+  {$IFDEF MSWINDOWS}
   S: RawByteString;
+  {$ELSE}
+  I: Integer;
+  C: PWord;
+  {$ENDIF}
 begin
   SetLength(Result, V1.Length);
   if V1.Length > 0 then
   begin
     //переписал, 4873
+  {$IFDEF MSWINDOWS}
     SetLength(s, V1.Length);
     Move(V1.FBytes[0], s[1], V1.Length);
     Result := string(s);
-    {C := PWord(PWideChar(Result));
+  //еще переписал, 7592
+  {$ELSE}
+    C := PWord(PWideChar(Result));
     for I := 0 to V1.Length-1 do
     begin
       C^ := V1.FBytes[I];
       Inc(C);
-    end;}
+    end;
+  {$ENDIF}
   end;
 end;
 
